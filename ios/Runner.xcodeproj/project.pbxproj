@@ -63,9 +63,18 @@
 				7AFA3C8E1D35360C0083082E /* Release.xcconfig */,
 				9740EEB31CF90195004384FC /* Generated.xcconfig */,
 			);
+			
+			SystemCapabilities = {
+	com.apple.BackgroundModes = {
+		enabled = 1;
+	};
+};
 			name = Flutter;
 			sourceTree = "<group>";
 		};
+
+
+
 		97C146E51CF9000F007C117D = {
 			isa = PBXGroup;
 			children = (
@@ -281,6 +290,8 @@
 			};
 			name = Profile;
 		};
+
+		
 		249021D4217E4FDB00AE95B9 /* Profile */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;

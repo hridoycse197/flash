@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_background/flutter_background.dart';
-import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:torch_light/torch_light.dart';
 
@@ -13,10 +11,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   bool checkTourch = true;
   stt.SpeechToText? _speech;
   bool isListening = false;
-  String showText = 'Press the button to talk';
+  String showText = 'Enable Mic And Say Light On';
   bool isFlashon = false;
 
-  final service = FlutterBackgroundService();
+  // final service = FlutterBackgroundService();
   //bg
 
   String result = "Say something!";
@@ -24,106 +22,219 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   String confirmationReply = "";
   String voiceReply = "";
   bool isbg = false;
+
+  bool _enabled = false;
+  bool _enabled1 = false;
+  int _status = 0;
+  List<DateTime> _events = [];
   @override
   initState() {
     WidgetsBinding.instance.addObserver(this);
     _speech = stt.SpeechToText();
-    initializeService();
+    // initializeService();
+
     setState(() {
       if (mounted) isListening = true;
     });
 
-    FlutterBackground.initialize(androidConfig: androidConfig);
+    //FlutterBackground.initialize(androidConfig: androidConfig);
     super.initState();
   }
 
-  Future<void> initializeService() async {
-    service.startService();
-  }
+  // Future<void> initializeService() async {
+  //  service.startService();
+  // }
 
   final String accessKey = "..."; // your Picovoice AccessKey
 
-  final androidConfig = const FlutterBackgroundAndroidConfig(
-    notificationTitle: "TourchLight",
-    notificationText: "App running in the background",
-    notificationImportance: AndroidNotificationImportance.Max,
-    notificationIcon: AndroidResource(
-        name: 'background_icon',
-        defType: 'drawable'), // Default is ic_launcher from folder mipmap
-  );
+  // final androidConfig = const FlutterBackgroundAndroidConfig(
+  //   notificationTitle: "TourchLight",
+  //   notificationText: "App running in the background",
+  //   notificationImportance: AndroidNotificationImportance.Max,
+  //   notificationIcon: AndroidResource(
+  //       name: 'background_icon',
+  //       defType: 'drawable'), // Default is ic_launcher from folder mipmap
+  // );
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xff072ff7).withOpacity(0.5),
-      body: SafeArea(
-        child: FutureBuilder(
-          future: _isTorchAvailable(context),
-          builder: (context, AsyncSnapshot snapshot) {
-            return Center(
-              child: Column(
-                children: [
-                  Container(
-                      alignment: Alignment.center,
-                      height: MediaQuery.of(context).size.height - 300,
-                      width: MediaQuery.of(context).size.width,
-                      child: InkWell(
-                        onTap: () {
-                          setState(() {
-                            isFlashon = !isFlashon;
-                            isFlashon
-                                ? _enableTorch(context)
-                                : _disableTorch(context);
-                          });
-                        },
-                        child: Image.asset(
-                          !isFlashon ? 'assets/t1.png' : 'assets/t.png',
-                          height: MediaQuery.of(context).size.height - 300,
-                          width: MediaQuery.of(context).size.width,
+      body: Container(
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+              colors: [Color(0xFF3A3A3B), Color(0xff141318)],
+              begin: Alignment.topCenter,
+              end: Alignment.center),
+        ),
+        child: SafeArea(
+          child: FutureBuilder(
+            future: _isTorchAvailable(context),
+            builder: (context, AsyncSnapshot snapshot) {
+              return Center(
+                child: Column(
+                  children: [
+                    Container(
+                      decoration: const BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                                color: Color(0xff151519),
+                                offset: Offset(-4, 7),
+                                blurRadius: 5,
+                                blurStyle: BlurStyle.normal,
+                                spreadRadius: 4),
+                          ],
+                          gradient: LinearGradient(
+                              colors: [Color(0xff3A3A3B), Color(0xff141318)])),
+                      height: MediaQuery.of(context).size.height * 0.09,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: 20,
+                        itemBuilder: (context, index) => Container(
+                          width: 65,
+                          decoration: const BoxDecoration(
+                              color: Color(0xff3A3A3B),
+                              boxShadow: [
+                                BoxShadow(
+                                    color: Color(0xff151519),
+                                    offset: Offset(-.5, -.5),
+                                    blurRadius: 8,
+                                    blurStyle: BlurStyle.normal,
+                                    spreadRadius: 10),
+                              ]),
                         ),
-                      )),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              elevation: 2,
-                              minimumSize: Size(
-                                MediaQuery.of(context).size.width / 2.5,
-                                30,
-                              ),
-                              backgroundColor: Colors.green,
-                              shadowColor: Colors.grey),
-                          onPressed: () async {
-                            FlutterBackground.enableBackgroundExecution();
-                            service.on(isListen());
-                          },
-                          child: Text('Enable'),
-                        ),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
-                              shadowColor: Colors.grey,
-                              minimumSize: Size(
-                                  MediaQuery.of(context).size.width / 2.5, 30)),
-                          onPressed: () async {
-                            await FlutterBackground
-                                .disableBackgroundExecution();
-
-                            _speech!.stop();
-                          },
-                          child: Text("disable"),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                  Text(showText)
-                ],
-              ),
-            );
-          },
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.1,
+                    ),
+                    !isFlashon
+                        ? const CircleAvatar(
+                            radius: 12,
+                            backgroundColor: Color(0xff19660C),
+                          )
+                        : const CircleAvatar(
+                            radius: 12,
+                            backgroundColor: Color(0xff34ED16),
+                          ),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.05,
+                    ),
+                    !isFlashon
+                        ? GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _enabled1 = false;
+                                isFlashon = !isFlashon;
+                                isFlashon
+                                    ? _enableTorch(context)
+                                    : _disableTorch(context);
+                              });
+                            },
+                            child: Container(
+                                alignment: Alignment.center,
+                                height:
+                                    MediaQuery.of(context).size.height * 0.28,
+                                width: MediaQuery.of(context).size.width * 0.7,
+                                decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Color(0xff393939)),
+                                child: Image.asset('assets/off_button.png')),
+                          )
+                        : GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _enabled1 = false;
+                                isFlashon = !isFlashon;
+                                isFlashon
+                                    ? _enableTorch(context)
+                                    : _disableTorch(context);
+                              });
+                            },
+                            child: Container(
+                                alignment: Alignment.center,
+                                height:
+                                    MediaQuery.of(context).size.height * 0.28,
+                                width: MediaQuery.of(context).size.width * 0.7,
+                                decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Color(0xff393939)),
+                                child: Image.asset('assets/light on.png')),
+                          ),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.07,
+                    ),
+                    Text(
+                      showText,
+                      style: TextStyle(color: Colors.white, fontSize: 25),
+                    ),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.07,
+                    ),
+                    Container(
+                      height: MediaQuery.of(context).size.width * .12,
+                      decoration: BoxDecoration(
+                        color: Color(0xff38373A),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      width: MediaQuery.of(context).size.width * .7,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          GestureDetector(
+                            onTap: () async {
+                              setState(() {
+                                _enabled = true;
+                                isListening = true;
+                              });
+
+                              isListen();
+                            },
+                            child: Text(
+                              'Enable Mic',
+                              style: TextStyle(
+                                  color: !_enabled
+                                      ? Colors.white
+                                      : Color(0xff34ED16),
+                                  fontSize: 15),
+                            ),
+                          ),
+                          Container(
+                            color: Colors.black,
+                            width: 2,
+                            height: MediaQuery.of(context).size.width * .12,
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _enabled = false;
+                                _enabled1 = true;
+                                isListening = false;
+                                showText = 'Enable Mic And Say Light On';
+                              });
+
+                              _speech!.stop();
+                            },
+                            child: Text(
+                              'Disable Mic',
+                              style: TextStyle(
+                                  color: _enabled
+                                      ? Color(0xffEFBA00)
+                                      : !_enabled1
+                                          ? Color(0xffEFBA00)
+                                          : Color(0xff34ED16),
+                                  fontSize: 15),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -161,7 +272,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         }),
       );
     }
-    if (FlutterBackground.isBackgroundExecutionEnabled) {
+    if (isListening == true) {
       isListen();
     } else {
       _speech!.stop();
